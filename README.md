@@ -1,5 +1,5 @@
 # Deep-Q-Learning-on-Carla
-Testing a double deep q-network for self-driving cars using open-source Carla environment. Code mainly generated from open-source authors with some modification to simplify it. Used as a learning experience to apply knowledge about reinforcement learning. 
+Testing a double deep q-network for self-driving cars using open-source Carla environment. Code mainly generated from open-source authors with slight modifications to implementation of memory buffer and network architecture (no dueling added in, thus no advantage or value functions). Used as a learning experience to apply knowledge about reinforcement learning. 
 
 <p align="center">
   <img src="https://github.com/Ashwins9001/Deep-Q-Learning-on-Carla/blob/master/Pictures/Render.JPG" width="420"/> 
@@ -27,6 +27,6 @@ A large source of error is the constantly changing environment. The car respawns
 </p>
 
 ## Acknowledgments
-Implementation heavily based on Felippe Roza's Double DQN with Priority Experience Replay: https://github.com/FelippeRoza/carla-rl
+Implementation heavily based on Felippe Roza's Double Duel DQN with Priority Experience Replay: https://github.com/FelippeRoza/carla-rl
 
 Referenced Simonini Thomas's Deep Learning course for learning to interface Tensorflow with Gym environments: https://github.com/simoninithomas/Deep_reinforcement_learning_Course
