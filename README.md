@@ -17,7 +17,9 @@ Quite a bit is boilerplate code to allow Tensorflow to interface with the Carla 
 - [x] class Sensors(object) -> Use lambda func to listen for collision, lane crossing, and RGB images by anchoring sensor objects to actor (car)
 
 ## Results
-After training for 50 episodes with 100 steps per episode and a memory buffer size of 1000, results showed no obvious trend. A large source of error is the constantly changing environment. The car respawns randomly upon every episode to ensure the agent is exposed to many new experiences, however due to this the rewards and subsequent loss will also highly vary. The only solution is to attempt training on many more episodes with a larger memory buffer to look for trends. 
+After training for 50 episodes with 100 steps per episode and a memory buffer size of 1000, results showed no obvious trend. 
+
+A large source of error is the constantly changing environment. The car respawns randomly upon every episode to ensure the agent is exposed to many new experiences, however due to this the rewards and subsequent loss will also highly vary. The only solution is to attempt training on many more episodes with a larger memory buffer to look for trends. 
 
 <p align="center">
   <img src="https://github.com/Ashwins9001/Deep-Q-Learning-on-Carla/blob/master/Pictures/Training_Loss.png" width="420"/> 
