@@ -13,4 +13,5 @@ Quite a bit is boilerplate code to allow Tensorflow to interface with the Carla 
 
 ## Acknowledgments
 Implementation heavily based on Felippe Roza's Double DQN with Priority Experience Replay: https://github.com/FelippeRoza/carla-rl
+
 Referenced Simonini Thomas's Deep Learning course for learning to interface Tensorflow with Gym environments: https://github.com/simoninithomas/Deep_reinforcement_learning_Course
