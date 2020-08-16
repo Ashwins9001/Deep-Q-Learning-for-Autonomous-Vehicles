@@ -28,12 +28,15 @@ A large source of error is the constantly changing environment. The car respawns
 
 ## Acknowledgments
 Project used for educational purposes to understand, implement and experiment with deep q-networks. Code is combination from other authors' work who are accredited below.
+
 Thank you for keeping your contributions open-source for others to learn from.
 
 Implementation heavily based on Felippe Roza's Double Duel DQN with Priority Experience Replay: https://github.com/FelippeRoza/carla-rl
+
 Neural network architecture (DQNetwork() class), predict_action(), map_from_control(), testing(), training(), process_image(), update_target_graph(), compute_reward(), render_loop(), map_action(), map_from_control() functions attributed to Felippe's work.
 
 Referenced Simonini Thomas's Deep Learning course for learning to interface Tensorflow with Gym environments: https://github.com/simoninithomas/Deep_reinforcement_learning_Course
+
 Memory() class attributed to Thomas's work.
 
 Remaining functions come from Carla documentation to interface with server.
