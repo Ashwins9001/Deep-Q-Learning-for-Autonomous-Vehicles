@@ -37,6 +37,6 @@ Neural network architecture (DQNetwork() class), predict_action(), map_from_cont
 
 Referenced Simonini Thomas's Deep Learning course for learning to interface Tensorflow with Gym environments: https://github.com/simoninithomas/Deep_reinforcement_learning_Course
 
-Memory() class attributed to Thomas's work.
+Memory() class, predict_action() functions attributed to Thomas's work.
 
 Remaining functions come from Carla documentation to interface with server.
