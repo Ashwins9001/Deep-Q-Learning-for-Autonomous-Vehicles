@@ -39,6 +39,6 @@ Referenced Simonini Thomas's Deep Learning course for learning to interface Tens
 
 Memory() class, predict_action() functions attributed to Thomas's work.
 
-Referenced Arthur Juliani for update_target_graph() function, more found here: https://github.com/awjuliani
+Referenced Arthur Juliani for update_target_graph() function, more found from Deep Reinforcement Learning Tutorials page: https://github.com/awjuliani/oreilly-rl-tutorial
 
 Remaining functions come from Carla documentation to interface with server.
