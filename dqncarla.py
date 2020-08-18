@@ -740,6 +740,8 @@ class DQNetwork():
             
             self.target_Q = tf.placeholder(tf.float32, [None], name="target") 
             
+            #multiple convolutions to downsample image and eventually
+            #encode it to vector form to feed into neural network
             self.conv1 = tf.layers.conv2d(inputs=self.inputs_, 
                                           filters=32,
                                           kernel_size=[8,8],
@@ -778,6 +780,7 @@ class DQNetwork():
                                       kernel_initializer=tf.contrib.layers.xavier_initializer(),
                                       name="fc1")
             
+            #force output to number of possible actions so each action has q-val
             self.output = tf.layers.dense(inputs=self.fc,
                                           kernel_initializer=tf.contrib.layers.xavier_initializer(),
                                           units=self.action_size,
@@ -802,8 +805,8 @@ class DQNetwork():
             action = self.possible_actions[action_int]
         else:
             #optimal action selection using output from DQN
-            Qs = sess.run(self.output, feed_dict={self.inputs_: state.reshape((1, *state.shape))})
-            action_int = np.argmax(Qs)
+            actionQvals = sess.run(self.output, feed_dict={self.inputs_: state.reshape((1, *state.shape))})
+            action_int = np.argmax(actionQvals)
             action = self.possible_actions[int(action_int)]
 
         return action_int, action, explore_probability
@@ -837,6 +840,8 @@ class Memory():
     #sample randomly from buffer to train, outputs an array
     def sample(self, batch_size):
         buffer_size = len(self.buffer)
+        #replace=True will return samples back and may cause repetition
+        #setting replace=False results in bug 
         index = np.random.choice(np.arange(buffer_size),
                                  size = batch_size,
                                  replace = True) 
