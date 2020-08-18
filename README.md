@@ -37,7 +37,7 @@ Neural network architecture (DQNetwork() class), predict_action(), map_from_cont
 
 Referenced Simonini Thomas's Deep Learning course for learning to interface Tensorflow with Gym environments: https://github.com/simoninithomas/Deep_reinforcement_learning_Course
 
-Memory() class's init(), add(), sample(); predict_action() functions attributed to Thomas's work.
+Network architecture (DQNetwork() class), Memory() class's init(), add(), sample(); predict_action() functions attributed to Thomas's work.
 
 Referenced Arthur Juliani for update_target_graph() function, more found from Deep Reinforcement Learning Tutorials page: https://github.com/awjuliani/oreilly-rl-tutorial
 
