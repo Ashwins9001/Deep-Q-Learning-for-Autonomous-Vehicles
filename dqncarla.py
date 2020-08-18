@@ -36,10 +36,15 @@ import collections
 import pickle
 import matplotlib.pyplot as plt 
 
+#Define hyperparameters of network including possible actions,
+#learning-rate for gradient descent, number of training episodes,
+#batch_size per gradient descent training iteration, and memory buffer size
+
 test_flag = 0
 model_name = "DQNetwork"
 
 state_size = [84, 84, 1]
+
 # discrete action-space described as (throttle, steer, brake)
 action_space = np.array([(0.0, 0.0, 1.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0),
                         (0.5, 0.25, 0.0), (0.5, -0.25, 0.0), (0.5, 0.5, 0.0), (0.5, -0.5, 0.0)])
@@ -48,25 +53,25 @@ action_size = len(action_space)
 learning_rate= 0.00025
 
 # Training parameters
-total_episodes = 50  # INTIALLY  5000
+total_episodes = 50
 max_steps = 200
 batch_size = 64
 
-# Fixed Q target hyper parameters
-max_tau = 5000  # tau is the C step where we update out target network -- INTIALLY 10000
+max_tau = 5000  # tau is number of iterations until target network updated
 
-# exploration hyperparamters for ep. greedy. startegy
+# exploration params for epsilon greedy action selection
 explore_start = 1.0  # exploration probability at start
 explore_stop = 0.01  # minimum exploration probability
 decay_rate = 0.00005  # exponential decay rate for exploration prob
 
 
-# Q LEARNING hyperparameters
-gamma = 0.95  # Discounting rate
-pretrain_length = 100  ## Number of experiences stored in the Memory when initialized for the first time --INTIALLY 100k
-memory_size = 10000  # Number of experiences the Memory can keep  --INTIALLY 100k
+gamma = 0.95  #discount rate to priortize more recent rewards 
+pretrain_length = 100 
+memory_size = 10000  #mem buffer size
 memory_save_path = "memory.pkl"
 
+
+#The following are helper functions used to interface with Carla server
 
 # ==============================================================================
 # -- FadingText ----------------------------------------------------------------
@@ -786,7 +791,9 @@ class DQNetwork():
             
 
     def predict_action(self, sess, explore_start, explore_stop, decay_rate, decay_step, state):
-        # Epsilon greedy strategy: given state s, choose action a ep. greedy
+        #Implement epsilon-greedy action selection as policy where majority
+        #of time optimal (greedy) action chosen and sometimes random action
+        #chosen, probability of choosing randomly defined by explore_prob
         exp_tradeoff = np.random.rand()
         explore_probability = explore_stop + (explore_start - explore_stop) * np.exp(-decay_rate * decay_step)
 
@@ -794,20 +801,18 @@ class DQNetwork():
             action_int = np.random.choice(self.action_size)
             action = self.possible_actions[action_int]
         else:
-            # get action from Q-network: neural network estimates the Q values
+            #optimal action selection using output from DQN
             Qs = sess.run(self.output, feed_dict={self.inputs_: state.reshape((1, *state.shape))})
-
-            # choose the best Q value from the discrete action space (argmax)
             action_int = np.argmax(Qs)
             action = self.possible_actions[int(action_int)]
 
         return action_int, action, explore_probability
 
-def map_from_control(control, action_space):
-    '''maps continuous control to discrete action values
+'''maps continuous control to discrete action values
     used to convert control from autopilot to discrete values that the Q-network is using
     It works by computing the discrete action with the smaller euclidian distance from the
     continuous actions'''
+def map_from_control(control, action_space):
     control_vector = np.array([control.throttle, control.steer, control.brake])
     distances = [] # euclidian distance list
     for control in action_space:
@@ -825,9 +830,11 @@ class Memory():
         self.action_size = len(action_space)
         self.possible_actions = np.identity(self.action_size, dtype=int).tolist()
     
+    #function to add experience tuple to mem buffer
     def add(self, experience):
         self.buffer.append(experience)
         
+    #sample randomly from buffer to train, outputs an array
     def sample(self, batch_size):
         buffer_size = len(self.buffer)
         index = np.random.choice(np.arange(buffer_size),
@@ -835,7 +842,7 @@ class Memory():
                                  replace = True) 
         return [self.buffer[i] for i in index]
     
-    
+    #set agent on autopilot to retrieve useful experiences to fill buffer with
     def fill_memory(self, map, vehicle, camera_queue, sensors, autopilot = False):
         print("Started to fill memory")
         reset_environment(map, vehicle, sensors)
@@ -848,7 +855,9 @@ class Memory():
                 print(i, "experiences stored")
             state = process_image(camera_queue)
             control = vehicle.get_control()
+            #discretize continuous actions from carla-server into possible actions
             action_int = map_from_control(control, self.action_space)
+            #select action to compute reward with
             action = self.possible_actions[action_int]
            
             time.sleep(0.25)
@@ -944,6 +953,7 @@ class Sensors(object):
             sensor.destroy()
 
 
+#randomly spawn vehicle somewhere in environment, reset sensor data 
 def reset_environment(map, vehicle, sensors):
     vehicle.apply_control(carla.VehicleControl(throttle=0.0, brake=1.0))
     time.sleep(1)
@@ -952,9 +962,9 @@ def reset_environment(map, vehicle, sensors):
     vehicle.set_transform(spawn_point)
     time.sleep(2)
     sensors.reset_sensors()
-
+    
+'''get the image from the buffer and process it. It's the state for vision-based systems'''
 def process_image(queue):
-    '''get the image from the buffer and process it. It's the state for vision-based systems'''
     image = queue.get()
     array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
     array = np.reshape(array, (image.height, image.width, 4))
@@ -966,8 +976,8 @@ def process_image(queue):
     return image
 
 
+""" maps discrete actions into actual values to control the car"""
 def map_action(action, action_space):
-    """ maps discrete actions into actual values to control the car"""
     control = carla.VehicleControl()
     control_sequence = action_space[action]
     control.throttle = control_sequence[0]
@@ -976,18 +986,22 @@ def map_action(action, action_space):
 
     return control
 
+#Reward system for car 
 def compute_reward(vehicle, sensors):
     max_speed = 14
     min_speed = 2
     speed = vehicle.get_velocity()
+    #take magnitude of velocity along all axes to combine into single val
     vehicle_speed = np.linalg.norm([speed.x, speed.y, speed.z])
 
+    #reward vehicle based on speed relative to min, max limits
     speed_reward = (abs(vehicle_speed) - min_speed) / (max_speed - min_speed)
     lane_reward = 0
 
     if (vehicle_speed > max_speed) or (vehicle_speed < min_speed):
         speed_reward = -0.05
 
+    #heavily penalize if vehicle crosses lane or crashes
     if sensors.lane_crossed:
         if sensors.lane_crossed_type == "'Broken'" or sensors.lane_crossed_type == "'NONE'":
             lane_reward = -0.5
@@ -1051,9 +1065,10 @@ def training(map, vehicle, sensors):
     #init memory 
     print("memory init")
 
+    #begin filling up memory by setting car on autopilot 
     memory = Memory(max_size = memory_size, pretrain_length = pretrain_length, action_space = action_space)
     memory.fill_memory(map, vehicle, sensors.camera_queue, sensors, autopilot=True)
-    memory.save_memory(memory_save_path, memory)
+    memory.save_memory(memory_save_path, memory) #save memory to sample from 
     
     with tf.Session() as sess:
         print("session beginning")
@@ -1066,6 +1081,7 @@ def training(map, vehicle, sensors):
         for episode in range(1, total_episodes):
             #init episode
             print("env reset")
+            #reset environment, process input state using camera sensor
             reset_environment(map, vehicle, sensors)
             state = process_image(sensors.camera_queue)
             done = False
@@ -1074,6 +1090,15 @@ def training(map, vehicle, sensors):
         
             #step through episode & retrieve data from DNN
             for step in range(max_steps):
+                #increment tau and decay to account for updating target 
+                #features and improving epsilon-greedy policy
+                
+                #Logic is that as agent trains more in an episode
+                #it will learn more optimal actions and thus does not need
+                #to take random actions as often
+                #Require lower explore_prob to drive agent towards choosing
+                #greedy actions more often as it is trained more 
+                
                 tau += 1
                 decay_step += 1
                 #return optimal action index (action_int), action's one-hot encoding (action), and explore_prob
@@ -1088,19 +1113,27 @@ def training(map, vehicle, sensors):
                 reward = compute_reward(vehicle, sensors)
                 print("reward computed: " + str(reward))
                 
-                
+                #compute reward, add experience to memory and inc to next state
                 episode_reward += reward
                 done = isDone(reward)
                 memory.add((state, action, reward, next_state, done))
                 state = next_state
             
                 #begin learning by sampling a batch from memory
+                #remember every experience is an array
+                #when sampling a batch, useful to split up experiences into
+                #constituent arrays to access individual samples for q-learning
                 batch = memory.sample(batch_size)
                 
+                #state samples for batch
                 s_mb = np.array([each[0] for each in batch], ndmin = 3)
+                #action samples for batch
                 a_mb = np.array([each[1] for each in batch])
+                #reward samples for batch
                 r_mb = np.array([each[2] for each in batch])
+                #next state samples for batch
                 next_s_mb = np.array([each[3] for each in batch], ndmin = 3)
+                #done flag samples for batch
                 dones_mb = np.array([each[4] for each in batch])
                 
                 target_Qs_batch = []
@@ -1146,9 +1179,10 @@ def training(map, vehicle, sensors):
                                   'Explore P: {:.4f}'.format(explore_probability),
                                 'Training Loss {:.4f}'.format(loss))
                 
-                if sensors.collision_flag == True:
+                if sensors.collision_flag == True: #if vehicle collides, reset
                     break
                 
+            #track loss and rewards to analyze data 
             eps_loss.append(loss)
             dqn_scores.append(episode_reward)
         print("Loss per episode")
@@ -1157,6 +1191,7 @@ def training(map, vehicle, sensors):
         print(dqn_scores)
 
                 
+#Test loop to be run after training and model gets saved locally 
 def testing(map, vehicle, sensors):
     tf.reset_default_graph()
     with tf.Session() as sess:
@@ -1190,7 +1225,7 @@ def testing(map, vehicle, sensors):
                 time.sleep(0.25)
                 
                
-                    
+#Used to open carla server and determine if model is testing or training
 def control_loop(vehicle_id, host, port):
     actor_list = []
     try:
@@ -1212,6 +1247,8 @@ def control_loop(vehicle_id, host, port):
         print("done")
         sensors.destroy_sensors()       
 
+#Use multithreading to run neural network training and local pygame window
+#rendering at the same time to view the agent as it learns
 def render_loop(args):
     #loop responsible for rendering the simulation client
     pygame.init()
@@ -1249,7 +1286,8 @@ def render_loop(args):
 
         pygame.quit()
 
-
+#Main loop will parse commands from here and begin execution 
+#Can configure carla-server port, car model, window resolution as well
 def main():
     argparser = argparse.ArgumentParser(
         description='CARLA RL')
