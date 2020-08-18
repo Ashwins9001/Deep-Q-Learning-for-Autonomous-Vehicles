@@ -1,5 +1,5 @@
 # Deep-Q-Learning-on-Carla
-Testing a double deep q-network for self-driving cars using open-source Carla environment. Code mainly generated from open-source authors (Felippe Roza) with slight modifications (based on Simonini Thomas's deep q-learning implementation in Space Invaders) to memory buffer (no priority replay) and network architecture (no dueling added in, thus no advantage or value functions). Used as a learning experience to apply knowledge about reinforcement learning. 
+Testing a double deep q-network for self-driving cars using open-source Carla environment. Code mainly generated from open-source authors (Felippe Roza) with slight modifications (based on Simonini Thomas's deep q-learning implementation in Space Invaders) to memory buffer (no priority replay as Felippe Roza did) and network architecture (no dueling added in, thus no advantage or value functions). Used as a learning experience to apply knowledge about reinforcement learning. 
 
 <p align="center">
   <img src="https://github.com/Ashwins9001/Deep-Q-Learning-on-Carla/blob/master/Pictures/Render.JPG" width="420"/> 
