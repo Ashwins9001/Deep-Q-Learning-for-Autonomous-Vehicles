@@ -742,31 +742,34 @@ class DQNetwork():
             
             #multiple convolutions to downsample image and eventually
             #encode it to vector form to feed into neural network
+            
+            #Output size : 27 x 27 x 64
             self.conv1 = tf.layers.conv2d(inputs=self.inputs_, 
-                                          filters=32,
-                                          kernel_size=[8,8],
-                                          strides=[4,4],
+                                          filters=64,
+                                          kernel_size=[6,6],
+                                          strides=[3,3],
                                           padding="VALID",
-                                          kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
+                                          kernel_initializer=tf.variance_scaling_initializer(),
                                           name="conv1")
             self.conv1_out = tf.nn.elu(self.conv1, name="conv1_out")
             
+            #Output size: 9 x 9 x 128
             self.conv2 = tf.layers.conv2d(inputs=self.conv1_out, 
-                                          filters=64,
-                                          kernel_size=[4,4],
-                                          strides=[2,2],
+                                          filters=128,
+                                          kernel_size=[3,3],
+                                          strides=[3,3],
                                           padding="VALID",
-                                          kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
+                                          kernel_initializer=tf.variance_scaling_initializer(),
                                           name="conv2")
             self.conv2_out = tf.nn.elu(self.conv2, name="conv2_out")
 
-            
+            #Output size: 6 x 6 x 128
             self.conv3 = tf.layers.conv2d(inputs=self.conv2_out, 
-                                          filters=64,
-                                          kernel_size=[3,3],
-                                          strides=[2,2],
+                                          filters=128,
+                                          kernel_size=[4,4],
+                                          strides=[1,1],
                                           padding="VALID",
-                                          kernel_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
+                                          kernel_initializer=tf.variance_scaling_initializer(),
                                           name="conv3")
             #After multiple convolutions, use exponential linear unit
             #Activation function since DQN predicts continuous set of q-vals
@@ -777,12 +780,12 @@ class DQNetwork():
             self.fc = tf.layers.dense(inputs=self.flatten,
                                       units=512,
                                       activation=tf.nn.elu,
-                                      kernel_initializer=tf.contrib.layers.xavier_initializer(),
+                                      kernel_initializer=tf.variance_scaling_initializer(),
                                       name="fc1")
             
             #force output to number of possible actions so each action has q-val
             self.output = tf.layers.dense(inputs=self.fc,
-                                          kernel_initializer=tf.contrib.layers.xavier_initializer(),
+                                          kernel_initializer=tf.variance_scaling_initializer(),
                                           units=self.action_size,
                                           activation=None)
             
