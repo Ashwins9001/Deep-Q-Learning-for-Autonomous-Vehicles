@@ -41,4 +41,6 @@ Memory() class's init(), add(), sample(); predict_action() functions attributed 
 
 Referenced Arthur Juliani for update_target_graph() function, more found from Deep Reinforcement Learning Tutorials page: https://github.com/awjuliani/oreilly-rl-tutorial
 
+Additionally referenced Memory() class's init(), add(), sample(); predict_action() functions & code structure from Udacity's Deep Learning Course: https://github.com/udacity/deep-learning/blob/master/reinforcement/Q-learning-cart.ipynb
+
 Remaining functions come from Carla documentation to interface with server.
