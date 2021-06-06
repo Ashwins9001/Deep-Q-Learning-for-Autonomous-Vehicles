@@ -24,6 +24,8 @@ After training for 50 episodes with 100 steps per episode and a memory buffer si
 
 A large source of error is the constantly changing environment. The car respawns randomly upon every episode to ensure the agent is exposed to many new experiences, however due to this the rewards and subsequent loss will also highly vary. The only solution is to attempt training on many more episodes with a larger memory buffer to look for trends. 
 
+Alternatively a different approach can be attempted such as using a Policy Gradient instead. 
+
 <p align="center">
   <img src="https://github.com/Ashwins9001/Deep-Q-Learning-on-Carla/blob/master/Pictures/Training_Loss.png" width="420"/> 
   <img src="https://github.com/Ashwins9001/Deep-Q-Learning-on-Carla/blob/master/Pictures/Training_Reward.png" width="420"/>
